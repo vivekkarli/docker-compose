@@ -16,7 +16,6 @@ services:
     environment:
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
       SPRING_PROFILES_ACTIVE: default
-      SPRING_RABBITMQ_HOST: "rabbitmq"
 
   loans:
     image: "vivekkarli/loans:v1"
@@ -35,7 +34,6 @@ services:
     environment:
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
       SPRING_PROFILES_ACTIVE: default
-      SPRING_RABBITMQ_HOST: "rabbitmq"
 
   cards:
     image: "vivekkarli/cards:v1"
@@ -54,7 +52,6 @@ services:
     environment:
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
       SPRING_PROFILES_ACTIVE: default
-      SPRING_RABBITMQ_HOST: "rabbitmq"
 
   configserver:
     image: "vivekkarli/configserver:v1"
@@ -67,32 +64,13 @@ services:
       start_period: 10s
     ports:
       - 8071:8071
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
     deploy:
       resources:
         limits:
           memory: 700m
     networks:
       - idealbank
-    environment:
-      SPRING_RABBITMQ_HOST: "rabbitmq"
 
-  rabbitmq:
-    image: rabbitmq:4.0-management
-    container_name: rabbitmq
-    ports:
-      - 5672:5672
-      - 15672:15672
-    healthcheck:
-      test: rabbitmq-diagnostics check_port_connectivity
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 5s
-    networks:
-      - idealbank
 
 networks:
   idealbank:
