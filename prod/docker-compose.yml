@@ -5,6 +5,8 @@ services:
     ports:
       - 8080:8080
     depends_on:
+      accountsdb:
+        condition: service_healthy
       configserver:
         condition: service_healthy
     deploy:
@@ -16,6 +18,7 @@ services:
     environment:
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
       SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: "jdbc:mysql://accountsdb:3306/accountsdb"
 
   loans:
     image: "vivekkarli/loans:v1"
@@ -23,6 +26,8 @@ services:
     ports:
       - 8090:8090
     depends_on:
+      loansdb:
+        condition: service_healthy
       configserver:
         condition: service_healthy
     deploy:
@@ -34,6 +39,7 @@ services:
     environment:
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
       SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
 
   cards:
     image: "vivekkarli/cards:v1"
@@ -41,6 +47,8 @@ services:
     ports:
       - 9000:9000
     depends_on:
+      cardsdb:
+        condition: service_healthy
       configserver:
         condition: service_healthy
     deploy:
@@ -52,6 +60,7 @@ services:
     environment:
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
       SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: "jdbc:mysql://cardsdb:3306/cardsdb"
 
   configserver:
     image: "vivekkarli/configserver:v1"
@@ -68,6 +77,57 @@ services:
       resources:
         limits:
           memory: 700m
+    networks:
+      - idealbank
+
+  accountsdb:
+    image: mysql:latest
+    container_name: accountsdb
+    ports:
+      - 3306:3306
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: accountsdb
+    networks:
+      - idealbank
+
+  loansdb:
+    image: mysql:latest
+    container_name: loansdb
+    ports:
+      - 3307:3306
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: loansdb
+    networks:
+      - idealbank
+
+  cardsdb:
+    image: mysql:latest
+    container_name: cardsdb
+    ports:
+      - 3308:3306
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cardsdb
     networks:
       - idealbank
 
