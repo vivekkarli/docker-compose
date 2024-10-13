@@ -1,1 +1,1 @@
-"# docker-compose" 
+docker compose files for default, prod, qa environments 
