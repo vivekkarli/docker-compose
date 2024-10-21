@@ -9,6 +9,8 @@ services:
         condition: service_healthy
       configserver:
         condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -19,6 +21,7 @@ services:
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
       SPRING_PROFILES_ACTIVE: qa
       SPRING_DATASOURCE_URL: "jdbc:mysql://accountsdb:3306/accountsdb"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8070/eureka"
 
   loans:
     image: "vivekkarli/loans:v1"
@@ -30,6 +33,8 @@ services:
         condition: service_healthy
       configserver:
         condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -40,6 +45,7 @@ services:
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
       SPRING_PROFILES_ACTIVE: qa
       SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8070/eureka"
 
   cards:
     image: "vivekkarli/cards:v1"
@@ -51,6 +57,8 @@ services:
         condition: service_healthy
       configserver:
         condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -61,6 +69,7 @@ services:
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
       SPRING_PROFILES_ACTIVE: qa
       SPRING_DATASOURCE_URL: "jdbc:mysql://cardsdb:3306/cardsdb"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8070/eureka"
 
   configserver:
     image: "vivekkarli/configserver:v1"
@@ -79,6 +88,29 @@ services:
           memory: 700m
     networks:
       - idealbank
+
+  eurekaserver:
+    image: "vivekkarli/eurekaserver:v1"
+    container_name: eurekaserver-ms
+    healthcheck:
+      test: "curl --fail --silent localhost:8070/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    ports:
+      - 8070:8070
+    depends_on:
+      configserver:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - idealbank
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
 
   accountsdb:
     image: mysql:latest
