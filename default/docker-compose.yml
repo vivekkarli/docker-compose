@@ -47,6 +47,30 @@ services:
       SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8070/eureka"
 
+  loans1:
+    image: "vivekkarli/loans:v1"
+    container_name: loans-ms-1
+    ports:
+      - 8091:8090
+    depends_on:
+      loansdb:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - idealbank
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8070/eureka"
+
   cards:
     image: "vivekkarli/cards:v1"
     container_name: cards-ms
