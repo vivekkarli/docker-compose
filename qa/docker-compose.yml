@@ -112,6 +112,28 @@ services:
     environment:
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
 
+  gatewayserver:
+    image: "vivekkarli/gatewayserver:v1"
+    container_name: gatewayserver-ms
+    ports:
+      - 8072:8072
+    depends_on:
+      accounts:
+        condition: service_healthy
+      cards:
+        condition: service_healthy
+      loans:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - idealbank
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8070/eureka"
+
   accountsdb:
     image: mysql:latest
     container_name: accountsdb
