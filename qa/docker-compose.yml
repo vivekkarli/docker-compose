@@ -124,6 +124,8 @@ services:
         condition: service_healthy
       loans:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -133,6 +135,25 @@ services:
     environment:
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071"
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8070/eureka"
+      SPRING_DATA_REDIS_HOST: "redis"
+
+  redis:
+    image: redis:latest
+    container_name: redis-ms
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping", "|", "grep", "pong"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - idealbank
 
   accountsdb:
     image: mysql:latest
